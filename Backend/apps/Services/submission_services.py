@@ -1,7 +1,7 @@
 from apps import models
 from apps.repository.problem_repository import ProblemRepository
 from apps.repository.submission_repository import SubmissionRepository
-from apps.Services.code_runner import CodeRunner
+from apps.services.code_runner import CodeRunner
 from apps.models import SubmissionStatus
 from typing import cast
 
