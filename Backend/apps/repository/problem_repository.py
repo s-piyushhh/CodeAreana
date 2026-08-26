@@ -18,3 +18,7 @@ class ProblemRepository:
         self.db.commit()
         self.db.refresh(problem)
         return problem
+    
+    def delete(self, problem: models.Problem) -> None:
+        self.db.delete(problem)
+        self.db.commit()

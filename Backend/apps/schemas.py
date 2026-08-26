@@ -58,3 +58,8 @@ class SubmissionOut(BaseModel):
     code: str
     submitted_at: datetime
     status: SubmissionStatus
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
