@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from Backend.apps.auth import get_current_admin
+from apps.auth import get_current_admin
 from apps.database import get_db
 from apps import schemas, models
 from apps.repository.problem_repository import ProblemRepository
