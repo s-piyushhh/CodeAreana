@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from fastapi import APIRouter, status
 from apps import schemas
+from apps.repository.user_repository import UserRepository
+
 
 router = APIRouter(tags=["auth"])
 
@@ -50,8 +52,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
 
-    user = db.query(models.User).filter(
-        models.User.username == username).first()
+    user = UserRepository(db).get_by_username(username)
     if user is None:
         raise credentials_exception
     return user
@@ -67,10 +68,7 @@ def get_current_admin(current_user: models.User = Depends(get_current_user)) -> 
 
 @router.post("/register", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
 def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(models.User).filter(
-        (models.User.username == user_in.username) | (
-            models.User.email == user_in.email)
-    ).first()
+    existing = UserRepository(db).get_by_username_or_email(user_in.username, user_in.email)
     if existing:
         raise HTTPException(
             status_code=400, detail="Username or email already registered")
@@ -80,16 +78,12 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
         email=user_in.email,
         hashed_password=hash_password(user_in.password),
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    return UserRepository(db).create(user)
 
 
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(
-        models.User.username == form_data.username).first()
+    user = UserRepository(db).get_by_username(form_data.username)
    
     if not user or not verify_password(form_data.password, cast(str, user.hashed_password)):
         raise HTTPException(
